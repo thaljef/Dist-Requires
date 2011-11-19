@@ -8,14 +8,14 @@ use CPAN::Meta;
 use Module::CoreList;
 use Archive::Extract;
 use IPC::Run qw(run timeout);
-use Cwd::Guard qw(cwd_guard);
 use Path::Class qw(dir file);
 use File::Temp;
+use Cwd;
 
 # We don't use these directly, but they will be required to perform
 # configuration of our dists.  We want versions that will at least
 # generate a META.yml file for us (or maybe even MYMETA.yml!)
-use ExtUtils::MakeMaker 6.06;
+use ExtUtils::MakeMaker 6.58;
 use Module::Build 0.21;
 
 use version;
@@ -56,21 +56,6 @@ has target_perl_version => (
     isa        => 'Num',
     default    => $],
     # TODO: lazy_build => 1,
-);
-
-#-----------------------------------------------------------------------------
-
-=attr verbose => $BOOL
-
-If true, some diagnostic information will be printed to STDOUT.  False
-by default.
-
-=cut
-
-has verbose => (
-    is      => 'ro',
-    isa     => 'Bool',
-    default => 0,
 );
 
 #-----------------------------------------------------------------------------
@@ -187,8 +172,6 @@ sub _unpack_dist {
 sub _get_dist_requires {
     my ($self, $dist_dir) = @_;
 
-    my $guard = cwd_guard($dist_dir);
-
     $self->_configure($dist_dir);
 
     my $dist_meta = $self->_find_dist_meta($dist_dir);
@@ -203,7 +186,9 @@ sub _get_dist_requires {
 sub _configure {
     my ( $self, $dist_dir ) = @_;
 
-    my $guard = cwd_guard($dist_dir);
+    my $old_cwd = getcwd();
+    # Cwd::chdir() also sets $ENV{PWD}, which may be used by some dists!
+    Cwd::chdir($dist_dir) or croak "Unable to chdir to $dist_dir: $!";
 
     my $try_eumm = sub {
         if ( -e 'Makefile.PL' ) {
@@ -219,8 +204,11 @@ sub _configure {
     };
 
 
-    return $try_mb->() || $try_eumm->()
-        || croak "Failed to configure $dist_dir";
+    my $ok = $try_mb->() || $try_eumm->() || croak "Failed to configure $dist_dir";
+
+    Cwd::chdir($old_cwd) or croak "Unable to chdir to $old_cwd: $!";
+
+    return $ok;
 }
 
 #-----------------------------------------------------------------------------
@@ -341,11 +329,11 @@ control which version of perl to consider.
 
 =head1 CONSTRUCTOR
 
+=head2 new( %attributes )
+
 All of the attributes listed below can be set via the constructor, and
 retrieved via accessor methods by the same name.  Once constructed,
 the object is immutable and all attributes are read-only.
-
-=cut
 
 =head1 LIMITATIONS
 
@@ -362,6 +350,12 @@ future.
 L<Dist::Requires> will attempt to configure the distribution using
 whatever build mechanism it provides (i.e. L<Module::Build> or
 L<ExtUtils::MakeMaker>) and then extract the requirements from the
-resulting metadata files.  That this means you could be executing
-unsafe code.  However, this is no different from what L<cpanm> and
-L<cpan> do when you install a distribution.
+resulting metadata files.  That means you could be executing unsafe
+code.  However, this is no different from what L<cpanm> and L<cpan> do
+when you install a distribution.
+
+=head1 SEE ALSO
+
+L<Module::Depends>
+
+=cut
