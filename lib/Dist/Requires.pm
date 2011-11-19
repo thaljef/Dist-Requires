@@ -320,12 +320,12 @@ __PACKAGE__->meta->make_immutable();
 =head1 DESCRIPTION
 
 L<Dist::Requires> tells you which versions of which packages a
-distribution requires.  The distribution can be in an archive file
-(like you would get from a CPAN mirror) or unpacked into a directory.
-By default, the requirements will only include packages that are newer
-than the ones in the perl core (if they were in the core at all).  You
-can turn this feature off to get all requirements.  You can also
-control which version of perl to consider.
+distribution requires.  The distribution can be in an archive file or
+unpacked into a directory.  By default, the requirements will only
+include packages that are newer than the ones in the perl core (if
+they were in the core at all).  You can turn this feature off to get
+all requirements.  You can also control which version of perl to
+consider.
 
 =head1 CONSTRUCTOR
 
