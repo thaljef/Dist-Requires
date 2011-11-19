@@ -1,0 +1,36 @@
+{
+   "abstract" : "Dummy Dist",
+   "author" : [
+      "nobody"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112621",
+   "license" : [
+      "unknown"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "MB-Static",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Bar" : "1.004_01",
+            "Foo" : "v1.0.3"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.38"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Baz" : 0
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.1"
+}

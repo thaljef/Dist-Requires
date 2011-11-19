@@ -1,0 +1,19 @@
+---
+abstract: 'Dummy Dist'
+author:
+  - nobody
+build_requires:
+  Bar: 1.004_01
+  Foo: v1.0.3
+configure_requires:
+  Module::Build: 0.38
+dynamic_config: 0
+generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.112621'
+license: unknown
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: MB-Static
+requires:
+  Baz: 0
+version: 0.1
