@@ -1,0 +1,69 @@
+#!perl
+
+use strict;
+use warnings;
+
+use Pod::Usage;
+use Getopt::Long;
+use Dist::Requires;
+
+#------------------------------------------------------------------------------
+
+# VERSION
+
+#------------------------------------------------------------------------------
+
+GetOptions(\my %opts, qw(perl=s all help|?)) || pod2usage();
+pod2usage(-verbose => 1) if $opts{help};
+my $dist = shift || pod2usage();
+pod2usage() if @ARGV;
+
+
+my %filter_attr = $opts{all} ? (filter => {}) : ();
+my %perl_attr = $opts{perl} ? (target_perl_version => $opts{perl}) : ();
+my $dr = Dist::Requires->new(%perl_attr, %filter_attr);
+my %requires = $dr->requires(dist => $dist);
+printf "%-20s => %s\n", $_, $requires{$_} for sort keys %requires;
+exit;
+
+#------------------------------------------------------------------------------
+
+=head1 NAME
+
+dist-requires - Report packages required by a distribution
+
+=head1 SYNOPSIS
+
+   dist-requires [-perl VERSION] [-all] { DIST_ARCHIVE_FILE | DIST_DIRECTORY }
+   dist-requires -help
+
+=head1 DESCRIPTION
+
+L<dist-requires> will tell you which versions of which packages are
+required to build/test/run a distribution with a given version of
+perl.
+
+=head1 ARGUMENTS
+
+The only argument is the path to a distribution archive file
+(e.g. F<*.tar.gz> file) or the path to a directory containing an
+unpacked distribution.
+
+=head1 OPTIONS
+
+=head2 -perl PERL_VERSION
+
+Specifies which version of perl to consider when evaluating which
+packages would be necessary.
+
+=head2 -all
+
+List all required packages, not just those that are not provided in
+the perl core.
+
+=head2 -help
+
+Display usage information.
+
+=cut
+
