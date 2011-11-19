@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+    Added the dist-requires utility script.  This is handy for
+    quickly discovering prereqs at the command line.
+
 0.001     2011-11-18 23:53:04 America/Los_Angeles
 
     Initial release.
