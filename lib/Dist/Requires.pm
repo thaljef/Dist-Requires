@@ -162,12 +162,9 @@ sub _unpack_dist {
     $ae->extract( to => $temp ) or croak $ae->error();
 
     # Originally, we just returned the first entry in $ae->files() as the
-    # $dist_root, but that proved to be unreliable.  Some archives will
-    # have the root directory as the first entry.  Others will have the
-    # the first file *within* the root directory as the first entry.  So
-    # instead, we just look at the contents of the actual $temp directory.
-    # For a well-packaged archive it should contain exactly one child,
-    # and that child should be a directory.
+    # $dist_root, but that proved to be unreliable.  Better to just look
+    # in $temp and see what is there.  For a well-packaged archive, $temp
+    # should contain exactly one child and that child should be a directory.
 
     my @children = $temp->children();
     croak "$dist did not unpack into a single directory" if @children != 1;
