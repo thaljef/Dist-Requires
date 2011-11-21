@@ -161,8 +161,19 @@ sub _unpack_dist {
     my $ae = Archive::Extract->new( archive => $dist );
     $ae->extract( to => $temp ) or croak $ae->error();
 
-    my $dist_root = $temp->subdir( ( @{$ae->files()} )[0] );
-    croak "$dist did not unpack cleanly into a directory" if not -d $dist_root;
+    # Originally, we just returned the first entry in $ae->files() as the
+    # $dist_root, but that proved to be unreliable.  Some archives will
+    # have the root directory as the first entry.  Others will have the
+    # the first file *within* the root directory as the first entry.  So
+    # instead, we just look at the contents of the actual $temp directory.
+    # For a well-packaged archive it should contain exactly one child,
+    # and that child should be a directory.
+
+    my @dirs = $temp->children();
+    croak "$dist did not unpack into a single directory" if @dirs != 1;
+
+    my $dist_root = $dirs[0];
+    croak "$dist did not unpack into a directory" if not -d $dist_root;
 
     return $dist_root;
 }
@@ -192,14 +203,14 @@ sub _configure {
 
     my $try_eumm = sub {
         if ( -e 'Makefile.PL' ) {
-            return $self->_run( [$self->target_perl(), "Makefile.PL"] ) && -e 'Makefile';
+            return $self->_run( [$self->target_perl(), 'Makefile.PL'] ) && -e 'Makefile';
         }
     };
 
 
     my $try_mb = sub {
         if ( -e 'Build.PL' ) {
-            return $self->_run( [$self->target_perl(), "Build.PL"] ) && -e 'Build';
+            return $self->_run( [$self->target_perl(), 'Build.PL'] ) && -e 'Build';
         }
     };
 
@@ -278,9 +289,14 @@ sub _run {
     local $ENV{PERL_MM_OPT} = $ENV{PERL_MM_OPT};
     $ENV{PERL_MM_OPT} .= " INSTALLMAN1DIR=none INSTALLMAN3DIR=none";
 
+    $DB::single = 1;
+
     my ($in, $out);
-    return run( $cmd, \$in, \$out, \$out, timeout( $self->timeout() ) )
-        or croak "Configuration failed: $?\noutput was: $out";
+    my $ok = run( $cmd, \$in, \$out, \$out, timeout( $self->timeout() ) );
+
+    $ok or croak "Configuration failed: $?\noutput was: $out";
+
+    return $ok;
 
 }
 
