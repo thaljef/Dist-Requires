@@ -162,7 +162,7 @@ sub _unpack_dist {
     $ae->extract( to => $temp ) or croak $ae->error();
 
     # Originally, we just returned the first entry in $ae->files() as the
-    # $dist_root, but that proved to be unreliable.  Better to just look
+    # $dist_root, but that proved to be unreliable.  Better to actually look
     # in $temp and see what is there.  For a well-packaged archive, $temp
     # should contain exactly one child and that child should be a directory.
 
@@ -210,7 +210,6 @@ sub _configure {
             return $self->_run( [$self->target_perl(), 'Build.PL'] ) && -e 'Build';
         }
     };
-
 
     my $ok = $try_mb->() || $try_eumm->() || croak "Failed to configure $dist_dir";
 
@@ -286,15 +285,11 @@ sub _run {
     local $ENV{PERL_MM_OPT} = $ENV{PERL_MM_OPT};
     $ENV{PERL_MM_OPT} .= " INSTALLMAN1DIR=none INSTALLMAN3DIR=none";
 
-    $DB::single = 1;
-
     my ($in, $out);
     my $ok = run( $cmd, \$in, \$out, \$out, timeout( $self->timeout() ) );
-
-    $ok or croak "Configuration failed: $?\noutput was: $out";
+    $ok or croak "Configuration failed: $out";
 
     return $ok;
-
 }
 
 #-----------------------------------------------------------------------------
