@@ -3,6 +3,8 @@ package Dist::Requires;
 # ABSTRACT: Identify requirements for a distribution
 
 use Moose;
+use Moose::Util::TypeConstraints;
+
 use Carp;
 use CPAN::Meta;
 use Module::CoreList;
@@ -26,18 +28,26 @@ use namespace::autoclean;
 # VERSION
 
 #-----------------------------------------------------------------------------
+# Some custom types
+
+class_type 'Version', { class => 'version' };
+coerce 'Version', from 'Str', via { version->parse($_) };
+coerce 'Version', from 'Num', via { version->parse($_) };
+# TODO: Put those on CPAN as MooseX::Types::Version
+
+#-----------------------------------------------------------------------------
 
 =attr target_perl => $PATH
 
-Sets the perl executable that will be used to configure the distribution.
-Defaults to the perl that loaded this module.  NOTE: this attribute is
-not configurable at this time.
+The path to the perl executable that will be used to configure the
+distribution.  Defaults to the perl that loaded this module.  NOTE:
+this attribute is not configurable at this time.
 
 =cut
 
 has target_perl => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => 'Str',  # TODO: make this a Path::Class::File
     default  => $^X,
     init_arg => undef,
 );
@@ -47,14 +57,17 @@ has target_perl => (
 The core module list for the specified perl version will be used to
 filter the requirements.  This only matters if you're using the
 default package filter.  Defaults to the version of the perl specified
-by the C<perl> attribute..
+by the C<perl> attribute.  Can be specified as a decimal number, a
+dotted version string, or a L<version> object.
 
 =cut
 
 has target_perl_version => (
     is         => 'ro',
-    isa        => 'Num',
-    default    => $],
+    isa        => 'Version',
+    coerce     => 1,
+    lazy       => 1,
+    default    => sub { version->parse( $] ) },
     # TODO: lazy_build => 1,
 );
 
@@ -98,9 +111,9 @@ has filter => (
 sub _build_filter {
     my ($self) = @_;
 
-    my $v = $self->target_perl_version();
-    my $core_packages = $Module::CoreList::version{$v};  ## no critic (PackageVar)
-    croak "No such perl version: $v" if not $core_packages;
+    # version.pm doesn't always strip trailing zeros
+    my $tpv           = $self->target_perl_version->numify() + 0;
+    my $core_packages = $Module::CoreList::version{$tpv};  ## no critic (PackageVar)
 
     return { __versionize_values( %{$core_packages} ) };
 }
@@ -115,6 +128,23 @@ sub _build_target_perl_version {
     croak "Unable to determine the version of $perl: $!" if $?;
 
     return $version;
+}
+
+#-----------------------------------------------------------------------------
+
+sub BUILD {
+    my ($self) = @_;
+
+    my $tpv = $self->target_perl_version()->numify();
+    $tpv += 0;  # version.pm doesn't always strip trailing zeros
+
+    croak "The target_perl_version ($tpv) cannot be greater than this perl ($])"
+        if $tpv > $];
+
+    croak "Unknown version of perl: $tpv"
+        if not exists $Module::CoreList::version{$tpv};
+
+    return $self;
 }
 
 #-----------------------------------------------------------------------------
