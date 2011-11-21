@@ -142,7 +142,7 @@ sub BUILD {
         if $tpv > $];
 
     croak "Unknown version of perl: $tpv"
-        if not exists $Module::CoreList::version{$tpv};
+        if not exists $Module::CoreList::version{$tpv};  ## no critic (PackageVar)
 
     return $self;
 }
@@ -395,5 +395,7 @@ when you install a distribution.
 =head1 SEE ALSO
 
 L<Module::Depends>
+
+=for Pod::Coverage BUILD
 
 =cut
