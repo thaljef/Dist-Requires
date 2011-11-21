@@ -169,10 +169,10 @@ sub _unpack_dist {
     # For a well-packaged archive it should contain exactly one child,
     # and that child should be a directory.
 
-    my @dirs = $temp->children();
-    croak "$dist did not unpack into a single directory" if @dirs != 1;
+    my @children = $temp->children();
+    croak "$dist did not unpack into a single directory" if @children != 1;
 
-    my $dist_root = $dirs[0];
+    my $dist_root = $children[0];
     croak "$dist did not unpack into a directory" if not -d $dist_root;
 
     return $dist_root;
