@@ -1,5 +1,11 @@
 {{$NEXT}}
 
+    Improved the way we discover the root directory of a
+    distribution archive once it is unpacked.
+
+    Perl version numbers can now be specified as floats
+    or v-strings, or version objects.
+
 0.002     2011-11-19 00:58:25 America/Los_Angeles
 
     Added the dist-requires utility script.  This is handy for
