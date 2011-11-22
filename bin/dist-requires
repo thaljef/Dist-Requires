@@ -25,9 +25,9 @@ pod2usage() if @ARGV;
 my %filter_attr = $opts{all} ? (filter => {}) : ();
 my %perl_attr = $opts{perl} ? (target_perl_version => $opts{perl}) : ();
 my $dr = Dist::Requires->new(%perl_attr, %filter_attr);
-my %requires = $dr->requires(dist => $dist);
-my $longest = ( sort {$b <=> $a} map {length} keys %requires )[0];
-printf "%-${longest}s => %s\n", $_, $requires{$_} for sort keys %requires;
+my %prereqs = $dr->prerequisites(dist => $dist);
+my $longest = ( sort {$b <=> $a} map {length} keys %prereqs )[0];
+printf "%-${longest}s => %s\n", $_, $prereqs{$_} for sort keys %prereqs;
 exit;
 
 #------------------------------------------------------------------------------

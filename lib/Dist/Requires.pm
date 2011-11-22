@@ -149,7 +149,7 @@ sub BUILD {
 
 #-----------------------------------------------------------------------------
 
-=method requires( dist => $SOME_PATH )
+=method prerequisites( dist => $SOME_PATH )
 
 Returns the requirements of the distribution as a hash of PACKAGE_NAME
 => VERSION pairs.  The c<dist> argument can be the path to either a
@@ -160,7 +160,7 @@ attribute.
 
 =cut
 
-sub requires {
+sub prerequisites {
     my ( $self, %args ) = @_;
 
     my $dist          = $args{dist};
@@ -350,10 +350,10 @@ __PACKAGE__->meta->make_immutable();
   my $dr = Dist::Requires->new();
 
   # From a distribution archive file...
-  my $requires = $dr->requires(dist => 'Foo-Bar-1.2.tar.gz');
+  my $prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2.tar.gz');
 
   # From an unpacked distribution directory...
-  my $requires = $dr->requires(dist => 'Foo-Bar-1.2');
+  my $prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2');
 
 =head1 DESCRIPTION
 

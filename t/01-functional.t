@@ -19,7 +19,7 @@ my $filter = {};
 
 for my $dist_dir ($dists_dir->children) {
     my $dr = Dist::Requires->new(filter => $filter);
-    my %got = $dr->requires(dist => $dist_dir);
+    my %got = $dr->prerequisites(dist => $dist_dir);
 
     # Ignore prereqs imposed by toolchain
     delete $got{'ExtUtils::MakeMaker'};
@@ -36,7 +36,7 @@ $filter = {Foo => 'v1.0.1', Bar => '2.1'};
 
 for my $dist_dir ($dists_dir->children) {
     my $dr = Dist::Requires->new(filter => $filter);
-    my %got = $dr->requires(dist => $dist_dir);
+    my %got = $dr->prerequisites(dist => $dist_dir);
 
     # Ignore prereqs imposed by toolchain
     delete $got{'ExtUtils::MakeMaker'};
