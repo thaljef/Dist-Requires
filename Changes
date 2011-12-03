@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+     The requires() method has been renamed to prerequisites()
+  
+     The dist-requires utility has been moved into the examples
+     directory, so it will not be installed.
+
 0.003     2011-11-21 13:02:22 America/Los_Angeles
 
     Improved the way we discover the root directory of a
