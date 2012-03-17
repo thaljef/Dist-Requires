@@ -168,6 +168,9 @@ sub prerequisites {
     my %dist_requires = $self->_get_dist_requires($dist_dir);
     my %my_requires   = $self->_filter_requires(%dist_requires);
 
+    # Cleanup after ourselves.  The parent is a tempdir
+    $dist_dir->parent->remove();
+
     return %my_requires;
 }
 
@@ -187,7 +190,7 @@ sub _resolve_dist {
 sub _unpack_dist {
     my ($self, $dist) = @_;
 
-    my $temp = dir( File::Temp::tempdir(CLEANUP => 1) );
+    my $temp = dir( File::Temp::tempdir() );
     my $ae = Archive::Extract->new( archive => $dist );
     $ae->extract( to => $temp ) or croak $ae->error();
 
