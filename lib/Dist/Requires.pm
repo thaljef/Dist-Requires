@@ -190,16 +190,17 @@ sub _resolve_dist {
 sub _unpack_dist {
     my ($self, $dist) = @_;
 
-    my $temp = dir( File::Temp::tempdir() );
+    my $tempdir = dir( File::Temp::tempdir() );
     my $ae = Archive::Extract->new( archive => $dist );
-    $ae->extract( to => $temp ) or croak $ae->error();
+    $ae->extract( to => $tempdir ) or croak $ae->error();
 
-    # Originally, we just returned the first entry in $ae->files() as the
-    # $dist_root, but that proved to be unreliable.  Better to actually look
-    # in $temp and see what is there.  For a well-packaged archive, $temp
-    # should contain exactly one child and that child should be a directory.
+    # Originally, we just returned the first entry in $ae->files() as
+    # the $dist_root, but that proved to be unreliable.  Better to
+    # actually look in $tempdir and see what is there.  For a well
+    # packaged archive, $tempdir should contain exactly one child and
+    # that child should be a directory.
 
-    my @children = $temp->children();
+    my @children = $tempdir->children();
     croak "$dist did not unpack into a single directory" if @children != 1;
 
     my $dist_root = $children[0];
