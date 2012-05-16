@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+     Increase timeout, to allow for dists that take
+     a long time to configure.
+
 0.005     2012-03-17 00:20:20 America/Los_Angeles
 
      Better cleanup of temporary files
