@@ -83,7 +83,7 @@ configuration step.  Defaults to 15 seconds.
 has timeout => (
     is      => 'ro',
     isa     => 'Int',
-    default => 15,
+    default => 30,
 );
 
 #-----------------------------------------------------------------------------
