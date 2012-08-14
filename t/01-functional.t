@@ -11,7 +11,7 @@ use Test::Most (tests => 4);
 use Dist::Requires;
 
 my $dists_dir = dir($Bin, 'dists');
-my $expect = { Foo => 'v1.0.3', Bar => '1.00401', Baz => 0 };
+my $expect = { Foo => 'v1.0.3', Bar => '1.004_01', Baz => 0 };
 my $filter = {};
 
 #--------------------------------------------------------------------------

@@ -333,17 +333,7 @@ sub __versionize_values {
 
     for my $key (keys %h) {
         my $value = $h{$key} || 0;
-
-        # Sometimes we get values that have leading or trailing
-        # whitespace, which causes version.pm to puke.  So we trim that out.
-        $value =~ s{ }{}g;
-
-        # version.pm considers developer release version numbers
-        # (i.e. those with an underscore) to be less than the
-        # equivalent all-numeric version numbers.  So normalize
-        # these by removing the underscore.
-        $value =~ s{_}{}g;
-
+        $value =~ s{ }{}g;  # Some have trailing spaces?
         $h{$key} = version->parse( $value );
     }
 
