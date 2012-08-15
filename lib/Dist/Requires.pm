@@ -1,6 +1,6 @@
-package Dist::Requires;
-
 # ABSTRACT: Identify requirements for a distribution
+
+package Dist::Requires;
 
 use Moose;
 use MooseX::Types::Perl qw(VersionObject);
@@ -331,18 +331,20 @@ sub __versionize_values {
 
 #-----------------------------------------------------------------------------
 
-__PACKAGE__->meta->make_immutable();
+__PACKAGE__->meta->make_immutable;
 
 #-----------------------------------------------------------------------------
 
 1;
+
+=for Pod::Coverage BUILD
 
 =head1 SYNOPSIS
 
   use Dist::Requires;
   my $dr = Dist::Requires->new();
 
-  # From a distribution archive file...
+  # From a packed distribution archive file...
   my $prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2.tar.gz');
 
   # From an unpacked distribution directory...
@@ -350,13 +352,23 @@ __PACKAGE__->meta->make_immutable();
 
 =head1 DESCRIPTION
 
-L<Dist::Requires> answers the question "Which packages are required to
-install a distribution with a particular version of perl?"  The
-distribution can be in an archive file or unpacked into a directory.
-By default, the requirements will only include packages that are newer
-than the ones in the perl core (if they were in the core at all).  You
-can turn this feature off to get all requirements.  You can also
-control which version of perl to consider.
+L<Dist::Requires> reports the packages (and their versions) that are
+required to configure, test, build, and install a distribution.  The
+distribution may be either a packed distribution archive or an
+unpacked distribution directory.  By default, the results will exclude
+requirements that are satisfied by the perl core.
+
+L<Dist::Requires> is intended for discovering requirements in the same
+manner and context that L<cpan> and L<cpanm> do it.  It is
+specifically designed to support L<Pinto>, so I don't expect this
+module to be useful to you unless you are doing something that deals
+directly with the CPAN toolchain.
+
+L<Dist::Requires> does B<not> recurse into dependencies, it does
+B<not> scan source files for packages that you C<use> or C<require>,
+it does B<not> search for distribution metadata on CPAN, and it does
+B<not> generate pretty graphs.  If you need those things, please
+L</SEE ALSO>.
 
 =head1 CONSTRUCTOR
 
@@ -366,29 +378,30 @@ All of the attributes listed below can be set via the constructor, and
 retrieved via accessor methods by the same name.  Once constructed,
 the object is immutable and all attributes are read-only.
 
-=head1 LIMITATIONS
-
-Much of L<Dist::Requires> was inspired (even copied) from L<CPAN> and
-L<cpanm>.  However, both of those are much more robust and better at
-handling old versions of toolchain modules, broken metadata, etc.
-L<Dist::Requires> requires relatively new toolchain modules, and will
-probably only work if given a well-packaged distribution with sane
-metadata.  Perhaps L<Dist::Metadata> will become more robust in the
-future.
-
 =head1 BEWARE
 
 L<Dist::Requires> will attempt to configure the distribution using
-whatever build mechanism it provides (i.e. L<Module::Build> or
-L<ExtUtils::MakeMaker>) and then extract the requirements from the
-resulting metadata files.  That means you could be executing unsafe
-code.  However, this is no different from what L<cpanm> and L<cpan> do
-when you install a distribution.
+whatever build mechanism it provides (e.g. L<Module::Build> or
+L<ExtUtils::MakeMaker> or L<Module::Install>) and then extract the
+requirements from the resulting metadata files.  That means you could
+be executing unsafe code.  However, this is no different from what
+L<cpanm> and L<cpan> do when you install a distribution.
 
 =head1 SEE ALSO
 
+Neil Bowers has written an excellent comparison of various modules for
+finding dependencies L<here|http://neilb.org/reviews/dependencies.html>.
+
+L<CPAN::Dependency>
+
+L<CPAN::FindDependencies>
+
+L<Devel::Dependencies>
+
 L<Module::Depends>
 
-=for Pod::Coverage BUILD
+L<Module::Depends::Tree>
+
+L<Perl::PrereqScanner>
 
 =cut
