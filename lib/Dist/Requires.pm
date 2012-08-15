@@ -57,10 +57,9 @@ dotted version string, or a L<version> object.
 has target_perl_version => (
     is         => 'ro',
     isa        => VersionObject,
+    default    => sub { version->parse( $] ) },
     coerce     => 1,
     lazy       => 1,
-    default    => sub { version->parse( $] ) },
-    # TODO: lazy_build => 1,
 );
 
 #-----------------------------------------------------------------------------
@@ -95,7 +94,8 @@ to any empty hash.
 has filter => (
     is         => 'ro',
     isa        => 'HashRef',
-    lazy_build => 1,
+    builder    => '_build_filter',
+    lazy       => 1,
 );
 
 #-----------------------------------------------------------------------------
