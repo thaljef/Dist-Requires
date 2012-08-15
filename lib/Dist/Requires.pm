@@ -3,7 +3,7 @@ package Dist::Requires;
 # ABSTRACT: Identify requirements for a distribution
 
 use Moose;
-use Moose::Util::TypeConstraints;
+use MooseX::Types::Perl qw(VersionObject);
 
 use Carp;
 use CPAN::Meta;
@@ -28,14 +28,6 @@ use namespace::autoclean;
 # VERSION
 
 #-----------------------------------------------------------------------------
-# Some custom types
-
-class_type 'Version', { class => 'version' };
-coerce 'Version', from 'Str', via { version->parse($_) };
-coerce 'Version', from 'Num', via { version->parse($_) };
-# TODO: Put those on CPAN as MooseX::Types::Version
-
-#-----------------------------------------------------------------------------
 
 =attr target_perl => $PATH
 
@@ -52,7 +44,7 @@ has target_perl => (
     init_arg => undef,
 );
 
-=attr target_perl_version => $FLOAT
+=attr target_perl_version => $VERSION
 
 The core module list for the specified perl version will be used to
 filter the requirements.  This only matters if you're using the
@@ -64,7 +56,7 @@ dotted version string, or a L<version> object.
 
 has target_perl_version => (
     is         => 'ro',
-    isa        => 'Version',
+    isa        => VersionObject,
     coerce     => 1,
     lazy       => 1,
     default    => sub { version->parse( $] ) },
@@ -73,10 +65,10 @@ has target_perl_version => (
 
 #-----------------------------------------------------------------------------
 
-=attr timeout => $INT
+=attr timeout => $INTEGER
 
 Sets the timeout (in seconds) for running the distribution's
-configuration step.  Defaults to 15 seconds.
+configuration step.  Defaults to 30 seconds.
 
 =cut
 
@@ -152,7 +144,7 @@ sub BUILD {
 =method prerequisites( dist => $SOME_PATH )
 
 Returns the requirements of the distribution as a hash of PACKAGE_NAME
-=> VERSION pairs.  The c<dist> argument can be the path to either a
+=> VERSION pairs.  The C<dist> argument can be the path to either a
 distribution archive file (e.g. F<Foo-Bar-1.2.tar.gz>) or an unpacked
 distribution directory (e.g. F<Foo-Bar-1.2>).  The requirements will
 be filtered according to the values specified by the C<filter>
