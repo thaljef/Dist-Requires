@@ -59,10 +59,14 @@ my @builders  = qw(EUMM MB);
 # Failures
 
 {
-    my $dr = Dist::Requires->new;
-    my $dist_dir = $dists_dir->subdir('99_FAIL');
 
-    dies_ok { $dr->prerequisites(dist => $dist_dir) };
+  local $ENV{CONFIGURATION_SHOULD_FAIL} = 1;
+
+   for my $builder ( qw(EUMM_FAIL MB_FAIL) ) {
+        my $dr = Dist::Requires->new;
+        my $dist = $dists_dir->subdir($builder)->file("$builder-0.1.tar.gz");
+        dies_ok { $dr->prerequisites(dist => $dist) };
+    }
 }
 
 #--------------------------------------------------------------------------
