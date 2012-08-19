@@ -1,17 +1,17 @@
 # NAME
 
-Dist::Requires - Identify requirements for a distribution
+Dist::Requires - Identify prerequisites for a distribution
 
 # VERSION
 
-version 0.007
+version 0.008
 
 # SYNOPSIS
 
     use Dist::Requires;
     my $dr = Dist::Requires->new();
 
-    # From a distribution archive file...
+    # From a packed distribution archive file...
     my $prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2.tar.gz');
 
     # From an unpacked distribution directory...
@@ -19,13 +19,23 @@ version 0.007
 
 # DESCRIPTION
 
-[Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) answers the question "Which packages are required to
-install a distribution with a particular version of perl?"  The
-distribution can be in an archive file or unpacked into a directory.
-By default, the requirements will only include packages that are newer
-than the ones in the perl core (if they were in the core at all).  You
-can turn this feature off to get all requirements.  You can also
-control which version of perl to consider.
+[Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) reports the packages (and their versions) that are
+required to configure, test, build, and install a distribution.  The
+distribution may be either a packed distribution archive or an
+unpacked distribution directory.  By default, the results will exclude
+requirements that are satisfied by the perl core.
+
+[Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) is intended for discovering requirements in the same
+manner and context that [cpan](http://search.cpan.org/perldoc?cpan) and [cpanm](http://search.cpan.org/perldoc?cpanm) do it.  It is
+specifically designed to support [Pinto](http://search.cpan.org/perldoc?Pinto), so I don't expect this
+module to be useful to you unless you are doing something that deals
+directly with the CPAN toolchain.
+
+[Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) does __not__ recurse into dependencies, it does
+__not__ scan source files for packages that you `use` or `require`,
+it does __not__ search for distribution metadata on CPAN, and it does
+__not__ generate pretty graphs.  If you need those things, please
+["SEE ALSO"](#SEE ALSO).
 
 # CONSTRUCTOR
 
@@ -43,7 +53,7 @@ The path to the perl executable that will be used to configure the
 distribution.  Defaults to the perl that loaded this module.  NOTE:
 this attribute is not configurable at this time.
 
-## target\_perl\_version => $FLOAT
+## target\_perl\_version => $VERSION
 
 The core module list for the specified perl version will be used to
 filter the requirements.  This only matters if you're using the
@@ -51,10 +61,10 @@ default package filter.  Defaults to the version of the perl specified
 by the `perl` attribute.  Can be specified as a decimal number, a
 dotted version string, or a [version](http://search.cpan.org/perldoc?version) object.
 
-## timeout => $INT
+## timeout => $INTEGER
 
 Sets the timeout (in seconds) for running the distribution's
-configuration step.  Defaults to 15 seconds.
+configuration step.  Defaults to 30 seconds.
 
 ## filter => $HASHREF
 
@@ -71,34 +81,37 @@ to any empty hash.
 ## prerequisites( dist => $SOME\_PATH )
 
 Returns the requirements of the distribution as a hash of PACKAGE\_NAME
-=> VERSION pairs.  The c<dist> argument can be the path to either a
+=> VERSION pairs.  The `dist` argument can be the path to either a
 distribution archive file (e.g. `Foo-Bar-1.2.tar.gz`) or an unpacked
 distribution directory (e.g. `Foo-Bar-1.2`).  The requirements will
 be filtered according to the values specified by the `filter`
 attribute.
 
-# LIMITATIONS
-
-Much of [Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) was inspired (even copied) from [CPAN](http://search.cpan.org/perldoc?CPAN) and
-[cpanm](http://search.cpan.org/perldoc?cpanm).  However, both of those are much more robust and better at
-handling old versions of toolchain modules, broken metadata, etc.
-[Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) requires relatively new toolchain modules, and will
-probably only work if given a well-packaged distribution with sane
-metadata.  Perhaps [Dist::Metadata](http://search.cpan.org/perldoc?Dist::Metadata) will become more robust in the
-future.
-
 # BEWARE
 
 [Dist::Requires](http://search.cpan.org/perldoc?Dist::Requires) will attempt to configure the distribution using
-whatever build mechanism it provides (i.e. [Module::Build](http://search.cpan.org/perldoc?Module::Build) or
-[ExtUtils::MakeMaker](http://search.cpan.org/perldoc?ExtUtils::MakeMaker)) and then extract the requirements from the
-resulting metadata files.  That means you could be executing unsafe
-code.  However, this is no different from what [cpanm](http://search.cpan.org/perldoc?cpanm) and [cpan](http://search.cpan.org/perldoc?cpan) do
-when you install a distribution.
+whatever build mechanism it provides (e.g. [Module::Build](http://search.cpan.org/perldoc?Module::Build) or
+[ExtUtils::MakeMaker](http://search.cpan.org/perldoc?ExtUtils::MakeMaker) or [Module::Install](http://search.cpan.org/perldoc?Module::Install)) and then extract the
+requirements from the resulting metadata files.  That means you could
+be executing unsafe code.  However, this is no different from what
+[cpanm](http://search.cpan.org/perldoc?cpanm) and [cpan](http://search.cpan.org/perldoc?cpan) do when you install a distribution.
 
 # SEE ALSO
 
+Neil Bowers has written an excellent comparison of various modules for
+finding dependencies [here](http://neilb.org/reviews/dependencies.html).
+
+[CPAN::Dependency](http://search.cpan.org/perldoc?CPAN::Dependency)
+
+[CPAN::FindDependencies](http://search.cpan.org/perldoc?CPAN::FindDependencies)
+
+[Devel::Dependencies](http://search.cpan.org/perldoc?Devel::Dependencies)
+
 [Module::Depends](http://search.cpan.org/perldoc?Module::Depends)
+
+[Module::Depends::Tree](http://search.cpan.org/perldoc?Module::Depends::Tree)
+
+[Perl::PrereqScanner](http://search.cpan.org/perldoc?Perl::PrereqScanner)
 
 # SUPPORT
 
