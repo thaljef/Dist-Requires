@@ -12,7 +12,7 @@ use Archive::Extract;
 use IPC::Run qw(run timeout);
 use Path::Class qw(dir file);
 use File::Temp;
-use Cwd;
+use Cwd::Guard;
 
 # We don't use these directly, but they will be required to perform
 # configuration of our dists.  We want versions that will at least
@@ -217,9 +217,10 @@ sub _get_dist_requires {
 sub _configure {
     my ( $self, $dist_dir ) = @_;
 
-    my $old_cwd = getcwd();
-    # Cwd::chdir() also sets $ENV{PWD}, which may be used by some dists!
-    Cwd::chdir($dist_dir) or croak "Unable to chdir to $dist_dir: $!";
+    my $guard = Cwd::Guard->new($dist_dir)
+      or croak "chdir failed: $Cwd::Guard::Error";
+
+    local $ENV{PWD} = $dist_dir->stringify;
 
     # It seems we can't always rely on the exit status from running
     # the configuration.  So instead we just check for the presence of
@@ -241,8 +242,6 @@ sub _configure {
     };
 
     my $ok = $try_mb->() || $try_eumm->() || croak "Failed to configure $dist_dir";
-
-    Cwd::chdir($old_cwd) or croak "Unable to chdir to $old_cwd: $!";
 
     return $ok;
 }
