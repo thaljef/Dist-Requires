@@ -237,7 +237,7 @@ sub _configure {
     my $try_mb = sub {
         if ( -e 'Build.PL' ) {
             $self->_run( [$self->target_perl(), 'Build.PL'] );
-            return -e 'Build';
+            return -e 'Build' && -f _;
         }
     };
 
