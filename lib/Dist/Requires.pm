@@ -1,4 +1,4 @@
-# ABSTRACT: Identify requirements for a distribution
+# ABSTRACT: Identify prerequisites for a distribution
 
 package Dist::Requires;
 
