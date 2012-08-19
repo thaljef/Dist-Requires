@@ -221,16 +221,22 @@ sub _configure {
     # Cwd::chdir() also sets $ENV{PWD}, which may be used by some dists!
     Cwd::chdir($dist_dir) or croak "Unable to chdir to $dist_dir: $!";
 
+    # It seems we can't always rely on the exit status from running
+    # the configuration.  So instead we just check for the presence of
+    # the expected build sript.
+
     my $try_eumm = sub {
         if ( -e 'Makefile.PL' ) {
-            return $self->_run( [$self->target_perl(), 'Makefile.PL'] ) && -e 'Makefile';
+            $self->_run( [$self->target_perl(), 'Makefile.PL'] );
+            return -e 'Makefile';
         }
     };
 
 
     my $try_mb = sub {
         if ( -e 'Build.PL' ) {
-            return $self->_run( [$self->target_perl(), 'Build.PL'] ) && -e 'Build';
+            $self->_run( [$self->target_perl(), 'Build.PL'] );
+            return -e 'Build';
         }
     };
 
