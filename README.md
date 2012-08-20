@@ -12,10 +12,10 @@ version 0.008
     my $dr = Dist::Requires->new();
 
     # From a packed distribution archive file...
-    my $prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2.tar.gz');
+    my %prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2.tar.gz');
 
     # From an unpacked distribution directory...
-    my $prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2');
+    my %prereqs = $dr->prerequisites(dist => 'Foo-Bar-1.2');
 
 # DESCRIPTION
 
