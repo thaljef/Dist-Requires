@@ -217,18 +217,10 @@ sub _get_dist_requires {
 sub _configure {
     my ( $self, $dist_dir ) = @_;
 
-    my $guard = Cwd::Guard->new($dist_dir)
-      or croak "chdir failed: $Cwd::Guard::Error";
-
-    local $ENV{PWD} = $dist_dir->stringify;
-
-    # It seems we can't always rely on the exit status from running
-    # the configuration.  So instead we just check for the presence of
-    # the expected build sript.
-
     my $try_eumm = sub {
         if ( -e 'Makefile.PL' ) {
-            $self->_run( [$self->target_perl(), 'Makefile.PL'] );
+            my ($status, $output) = $self->_run_cmd( [$self->target_perl(), 'Makefile.PL'] );
+            # warn "Makefile.PL configuration is dubious: $output" if not $status;
             return -e 'Makefile';
         }
     };
@@ -236,14 +228,30 @@ sub _configure {
 
     my $try_mb = sub {
         if ( -e 'Build.PL' ) {
-            $self->_run( [$self->target_perl(), 'Build.PL'] );
+            my ($status, $output) = $self->_run_cmd( [$self->target_perl(), 'Build.PL'] );
+            # warn "Build.PL configuration is dubious: $output" if not $status;
             return -e 'Build' && -f _;
         }
     };
 
-    my $ok = $try_mb->() || $try_eumm->() || croak "Failed to configure $dist_dir";
 
-    return $ok;
+    # trick AutoInstall
+    local $ENV{PERL5_CPAN_IS_RUNNING} = local $ENV{PERL5_CPANPLUS_IS_RUNNING} = $$;
+
+    # e.g. skip CPAN configuration on local::lib
+    local $ENV{PERL5_CPANM_IS_RUNNING} = $$;
+
+    # use defaults for any intereactive prompts
+    local $ENV{PERL_MM_USE_DEFAULT} = 1;
+
+    # skip man page generation
+    local $ENV{PERL_MM_OPT} = $ENV{PERL_MM_OPT};
+    $ENV{PERL_MM_OPT} .= " INSTALLMAN1DIR=none INSTALLMAN3DIR=none";
+
+
+    local $ENV{PWD} = $dist_dir->stringify;
+    my $guard = Cwd::Guard->new($dist_dir) or croak "chdir failed: $Cwd::Guard::Error";
+    return $try_mb->() || $try_eumm->() || croak "Failed to configure $dist_dir";
 }
 
 #-----------------------------------------------------------------------------
@@ -255,6 +263,7 @@ sub _find_dist_meta {
         my $meta_file_path = file($dist_dir, $meta_file);
         next if not -e $meta_file_path;
         my $meta = eval { CPAN::Meta->load_file($meta_file_path) } || undef;
+        #warn "META file $meta_file_path is dubious: $@" if $@;
         return $meta if $meta;
     }
 
@@ -297,27 +306,13 @@ sub _filter_requires {
 
 #-----------------------------------------------------------------------------
 
-sub _run {
+sub _run_cmd {
     my ( $self, $cmd ) = @_;
-
-    # trick AutoInstall
-    local $ENV{PERL5_CPAN_IS_RUNNING} = local $ENV{PERL5_CPANPLUS_IS_RUNNING} = $$;
-
-    # e.g. skip CPAN configuration on local::lib
-    local $ENV{PERL5_CPANM_IS_RUNNING} = $$;
-
-    # use defaults for any intereactive prompts
-    local $ENV{PERL_MM_USE_DEFAULT} = 1;
-
-    # skip man page generation
-    local $ENV{PERL_MM_OPT} = $ENV{PERL_MM_OPT};
-    $ENV{PERL_MM_OPT} .= " INSTALLMAN1DIR=none INSTALLMAN3DIR=none";
 
     my ($in, $out);
     my $ok = run( $cmd, \$in, \$out, \$out, timeout( $self->timeout() ) );
-    $ok or croak "Configuration failed: $out";
 
-    return $ok;
+    return ($ok, $out);
 }
 
 #-----------------------------------------------------------------------------
