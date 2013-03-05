@@ -56,6 +56,25 @@ my @builders  = qw(EUMM MB);
 }
 
 #--------------------------------------------------------------------------
+# Filter installed
+
+{
+    my $expect = {Foo => 'v1.0.3', Baz => 0};
+
+    for my $builder (@builders) {
+        my $dist = $dists_dir->subdir($builder)->file("$builder-0.1.tar.gz");
+        my $dr = Dist::Requires->new(filter_installed => [$dists_dir->subdir('inc')]);
+        my %got = $dr->prerequisites(dist => $dist);
+
+        # Ignore prereqs imposed by toolchain
+        delete $got{'ExtUtils::MakeMaker'};
+        delete $got{'Module::Build'};
+
+        is_deeply(\%got, $expect, "Filtered installed prereqs for $dist");
+    }
+}
+
+#--------------------------------------------------------------------------
 # Failures
 
 {
