@@ -100,6 +100,30 @@ has filter => (
 
 #-----------------------------------------------------------------------------
 
+=attr filter_installed => $ARRAYREF
+
+Given an arrayref of paths to search (for example, C<\@INC>), any distribution
+requirements that have the same version or less than those found
+installed in the search path will be excluded from the output.
+
+=cut
+
+has filter_installed => (
+    is         => 'ro',
+    isa        => 'ArrayRef',
+    default    => sub { [] },
+);
+
+# internal cache
+has _installed_versions => (
+    is         => 'ro',
+    isa        => 'HashRef',
+    init_arg   => undef,
+    default    => sub { +{} },
+);
+
+#-----------------------------------------------------------------------------
+
 sub _build_filter {
     my ($self) = @_;
 
@@ -292,8 +316,15 @@ sub _extract_requires {
 sub _filter_requires {
     my ($self, %requires) = @_;
 
-    my $filter = $self->filter();
+    # break reference
+    my $filter = { %{ $self->filter() } };
+    my $check_installed = @{ $self->filter_installed() };
+
     while ( my ($package, $version) = each %requires ) {
+        if ( $check_installed && ! exists $filter->{$package} ) {
+            my ($found, $have)  = $self->_find_installed_version($package);
+            $filter->{$package} = $have if $found;
+        }
         next if not exists $filter->{$package};
         delete $requires{$package} if $version <= $filter->{$package};
     };
@@ -302,6 +333,22 @@ sub _filter_requires {
     delete $requires{perl};
 
     return %requires;
+}
+
+#-----------------------------------------------------------------------------
+
+sub _find_installed_version {
+    my ($self, $module) = @_;
+
+    my $version = $self->_installed_versions->{$module} ||= do {
+      require Module::Metadata;
+      my $meta = Module::Metadata->new_from_module($module, inc => $self->filter_installed)
+          # short-circuit
+          or return (0, undef);
+      (__versionize_values($module => $meta->version))[1];
+    };
+
+    return (1, $version);
 }
 
 #-----------------------------------------------------------------------------
